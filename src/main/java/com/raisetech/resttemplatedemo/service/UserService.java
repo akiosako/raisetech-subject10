@@ -16,7 +16,8 @@ public interface UserService {
 
     void insertUser(InsertForm insertForm);
 
-    void updateUser(UpdateForm updateForm) throws Exception;
+    void updateUser(UpdateForm updateForm);
 
-    void deleteUser(DeleteForm deleteForm) throws Exception;
+    void deleteUser(DeleteForm deleteForm);
+
 }

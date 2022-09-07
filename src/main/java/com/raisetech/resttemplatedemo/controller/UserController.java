@@ -5,14 +5,18 @@ import com.raisetech.resttemplatedemo.entity.InsertForm;
 import com.raisetech.resttemplatedemo.entity.UpdateForm;
 import com.raisetech.resttemplatedemo.entity.User;
 import com.raisetech.resttemplatedemo.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 
 @RestController
 public class UserController {
@@ -23,8 +27,23 @@ public class UserController {
 
     }
 
+    @ExceptionHandler(value = ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNoResourceFound(
+            ResourceNotFoundException e, HttpServletRequest request) {
+        Map<String, String> body = Map.of(
+                "timestamp", ZonedDateTime.now().toString(),
+                "status", String.valueOf(HttpStatus.NOT_FOUND.value()),
+                "error", HttpStatus.NOT_FOUND.getReasonPhrase(),
+                "message", e.getMessage(),
+                "path", request.getRequestURI());
+        return new ResponseEntity(body, HttpStatus.NOT_FOUND);
+
+    }
+
     @GetMapping("/Users")
+
     public List<User> findAll() {
+
         return userService.findAll();
     }
 
@@ -32,7 +51,6 @@ public class UserController {
     public Optional<User> findById(@PathVariable int id) {
         return userService.findById(id);
     }
-
 
     @PostMapping("/Users")
     public ResponseEntity<String> insertUser(@RequestBody InsertForm insertForm) {
@@ -46,23 +64,18 @@ public class UserController {
     }
 
     @PatchMapping("/Users/{id}")
-    public ResponseEntity<Map<String, String>> updateUser(@PathVariable("id") int id, @RequestBody UpdateForm updateForm) {
+    public ResponseEntity<Map<String, String>> updateUser(@PathVariable("id") int id,
+                                                          @RequestBody UpdateForm updateForm) {
         updateForm.setId(id);
-        try {
-            userService.updateUser(updateForm);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        userService.updateUser(updateForm);
         return ResponseEntity.ok(Map.of("message", "name successfully updated"));
     }
 
     @DeleteMapping("/Users/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable int id, DeleteForm deleteForm) {
-        try {
-            userService.deleteUser(deleteForm);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
+        userService.deleteUser(deleteForm);
+
         return ResponseEntity.ok().body("name successfully deleted");
     }
 }

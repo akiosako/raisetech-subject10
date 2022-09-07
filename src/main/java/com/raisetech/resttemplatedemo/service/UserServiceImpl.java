@@ -1,5 +1,6 @@
 package com.raisetech.resttemplatedemo.service;
 
+import com.raisetech.resttemplatedemo.controller.ResourceNotFoundException;
 import com.raisetech.resttemplatedemo.entity.DeleteForm;
 import com.raisetech.resttemplatedemo.entity.InsertForm;
 import com.raisetech.resttemplatedemo.entity.UpdateForm;
@@ -27,8 +28,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> findById(int id) {
+        Optional<User> user = this.userMapper.findById(id);
+        if (user.isPresent()) {
+            return userMapper.findById(id);
+        } else {
+            throw new ResourceNotFoundException("resource not found");
+        }
 
-        return userMapper.findById(id);
     }
 
     @Override
@@ -45,8 +51,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(DeleteForm deleteForm) {
-
+        
         userMapper.deleteUser(deleteForm);
     }
 }
+
+
+
+
+
+
 
